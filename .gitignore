@@ -1,8 +1,8 @@
-# Plaintext of the locked section and the passphrase that encrypts it.
-# Only the ciphertext in index.html may be published.
+# Superseded local plaintext from the old encrypted-section approach.
+# Kept ignored so it can never be committed by accident.
 private/
 
-# QR codes embed the passphrase in their URL — never commit one.
+# QR codes embed a working credential — never commit one.
 *.qr.png
 *.qr.svg
 qr/
