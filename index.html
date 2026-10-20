@@ -63,6 +63,8 @@
   }
 
   *{box-sizing:border-box}
+  /* .unlock and .links set display:flex, which would otherwise beat [hidden] */
+  [hidden]{display:none !important}
   html,body{margin:0;padding:0}
   body{
     min-height:100vh;
@@ -119,7 +121,7 @@
 
   .links{display:flex;flex-direction:column;gap:10px;text-align:left}
 
-  a.link{
+  .link{
     display:flex;
     align-items:center;
     gap:14px;
@@ -131,8 +133,8 @@
     text-decoration:none;
     transition:background .15s ease, transform .15s ease, border-color .15s ease;
   }
-  a.link:hover{background:var(--row-hover);border-color:var(--accent);transform:translateY(-1px)}
-  a.link:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .link:hover{background:var(--row-hover);border-color:var(--accent);transform:translateY(-1px)}
+  .link:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
   .ico{flex:0 0 22px;width:22px;height:22px;color:var(--accent)}
   .ico svg{width:100%;height:100%;display:block;fill:currentColor}
@@ -141,6 +143,44 @@
   .label{display:block;font-size:15px;font-weight:600;line-height:1.2}
   .sub{display:block;font-size:12.5px;color:var(--muted);margin-top:4px;overflow-wrap:anywhere}
   .chev{margin-left:auto;color:var(--muted);flex:0 0 auto;opacity:.7}
+
+  /* locked section */
+  .vault{margin-top:10px;text-align:left}
+
+  button.link{width:100%;font:inherit;color:inherit;text-align:left;cursor:pointer;border-style:dashed}
+  button.link .ico{color:var(--muted)}
+  button.link:hover .ico{color:var(--accent)}
+  .vault[data-open="true"] button.link .chev{transform:rotate(90deg)}
+  .chev{transition:transform .15s ease}
+
+  .unlock{display:flex;gap:8px;margin-top:10px}
+  .unlock input{
+    flex:1;min-width:0;
+    padding:11px 13px;
+    border:1px solid var(--row-border);
+    border-radius:11px;
+    background:var(--row);
+    color:var(--fg);
+    font:inherit;font-size:14.5px;
+  }
+  .unlock input::placeholder{color:var(--muted)}
+  .unlock input:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:transparent}
+  .unlock button{
+    padding:11px 16px;
+    border:0;border-radius:11px;
+    background:var(--accent);
+    color:#06201c;
+    font:inherit;font-weight:600;font-size:14.5px;
+    cursor:pointer;white-space:nowrap;
+  }
+  .unlock button:disabled{opacity:.6;cursor:default}
+  .unlock button:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+
+  .err{margin:9px 2px 0;font-size:13px;color:#e11d48}
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .err{color:#fb7185}}
+  :root[data-theme="dark"] .err{color:#fb7185}
+
+  #private-links{margin-top:10px}
 
   .copy{
     margin:16px auto 0;
@@ -201,6 +241,28 @@
 
   </nav>
 
+  <section class="vault" id="vault-ui" data-open="false">
+
+    <button class="link" id="unlock-toggle" type="button" aria-expanded="false" aria-controls="unlock-form">
+      <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M17 9V7a5 5 0 0 0-10 0v2H5v13h14V9zM9 7a3 3 0 0 1 6 0v2H9zm4 9.7V19h-2v-2.3a2 2 0 1 1 2 0z"/></svg></span>
+      <span class="txt">
+        <span class="label">Private contacts</span>
+        <span class="sub">Scan my QR code, or enter the passphrase</span>
+      </span>
+      <span class="chev" aria-hidden="true">→</span>
+    </button>
+
+    <form class="unlock" id="unlock-form" hidden>
+      <input type="password" id="pass" placeholder="passphrase" autocomplete="off"
+             autocapitalize="none" spellcheck="false" aria-label="Passphrase">
+      <button type="submit" id="unlock-btn">Unlock</button>
+    </form>
+    <p class="err" id="err" role="alert" hidden></p>
+
+    <nav class="links" id="private-links" hidden aria-label="Private contact links"></nav>
+
+  </section>
+
   <button class="copy" id="copy" type="button">
     <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11z"/></svg>
     <span id="copy-text">Copy email address</span>
@@ -209,7 +271,158 @@
   <footer>Porto, Portugal</footer>
 </main>
 
+<!-- Ciphertext of the private section. Written by tools/lock.mjs — do not edit by hand. -->
+<!-- VAULT:START -->
+<script type="application/json" id="vault">
+{
+  "v": 1,
+  "kdf": "PBKDF2-SHA256",
+  "iterations": 600000,
+  "salt": "Rv3GIZZc2m4UfNl0p6hOCw==",
+  "iv": "3ZFPeRcQgAQH8Pcq",
+  "ct": "OpRUqTao6tpgdxjZh7VOGabwtcG2/Yf5TWDQHERO7RBt25qeLvFzr17Z96PoiRmDJ8iJ2ctmW/wykoTrFGk3uqcaq8mYRd+iTCp0+b9mVM9jnmghLVk2/LPgqTxAVFmI1YsvnUNaAV2w3WqoJ52Xyy+TOA/B26Av3Qj+5YsKK006ujSgxSQNOpy7na7eKqds/FPk3JFeP13NSULaI9LI6Lp+Tnd5YNthe7uAu2uEy/o1aC92PLdKJgUtU/LR56B0Tg83UAJSJT1D/EX44tCQ7BGxwD6IBAsOit46WdryPazESkDNxZMrlCv34Cv7BhBlkk7nc6uNscwB9otV9ZjvHwJ3bFxjJNWDXggMbk8LEHcd9F5LaBLjTtEgaqjv6sWd7TUA8gok3b2aW2mlBucp+p1Fq3aEus1xA1O4/Ey0hPxQ/HNmuyuDw/KwHLkp7bcYRNK+mh2YbZbwrRB0B22OYosvMxqrmovdJWCyk9QECJ/vWrurVS5CHgioUPW8hiG5We/1kgjAtinE7lRRz6AlWzmFssyixoBpFV8="
+}
+</script>
+<!-- VAULT:END -->
+
 <script>
+  // Private section: AES-256-GCM, key derived from the passphrase with PBKDF2.
+  // Only ciphertext is published; a wrong passphrase fails GCM authentication.
+  (function () {
+    var vault;
+    try { vault = JSON.parse(document.getElementById('vault').textContent); } catch (e) { vault = {}; }
+    if (!vault.ct) { document.getElementById('vault-ui').hidden = true; return; }
+
+    var ICONS = {
+      phone: '<path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.46.57 3.6a1 1 0 0 1-.25 1z"/>',
+      whatsapp: '<path d="M12.04 2a9.9 9.9 0 0 0-8.5 15l-1.3 4.8 4.9-1.3A9.9 9.9 0 1 0 12.04 2zm0 1.8a8.1 8.1 0 1 1-4.1 15.1l-.3-.2-2.9.8.8-2.8-.2-.3A8.1 8.1 0 0 1 12.04 3.8zm-3.1 4c-.2 0-.5.1-.7.4-.3.3-.9.9-.9 2.1s.9 2.4 1 2.6c.1.2 1.7 2.7 4.2 3.7 2.1.8 2.5.7 3 .6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.6-.3c-.2-.1-1.3-.7-1.5-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1-.2-.1-1-.4-1.9-1.2-.7-.6-1.2-1.4-1.3-1.6-.1-.2 0-.4.1-.5l.4-.5.3-.5v-.5l-.8-1.8c-.2-.4-.4-.4-.5-.4h-.5z"/>',
+      telegram: '<path d="M9.04 15.47 8.8 19.1c.37 0 .53-.16.72-.35l1.73-1.66 3.58 2.62c.66.37 1.13.18 1.3-.6l2.36-11.1c.22-.98-.35-1.36-1-1.12L3.2 10.37c-.96.38-.95.92-.16 1.16l3.62 1.13 8.4-5.29c.4-.24.76-.11.46.15z"/>',
+      instagram: '<path d="M12 2.2c3.2 0 3.6 0 4.9.07 1.17.05 1.8.25 2.23.42.56.22.96.48 1.38.9.42.42.68.82.9 1.38.17.42.37 1.06.42 2.23.06 1.27.07 1.65.07 4.86s-.01 3.6-.07 4.86c-.05 1.17-.25 1.8-.42 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.17-1.06.37-2.23.42-1.27.06-1.65.07-4.86.07s-3.6-.01-4.86-.07c-1.17-.05-1.8-.25-2.23-.42-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.17-.42-.37-1.06-.42-2.23C2.21 15.6 2.2 15.2 2.2 12s.01-3.6.07-4.86c.05-1.17.25-1.8.42-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.17 1.06-.37 2.23-.42C8.4 2.21 8.8 2.2 12 2.2zm0 1.98c-3.14 0-3.51.01-4.75.07-1.15.05-1.77.24-2.18.4-.55.22-.94.47-1.35.88-.41.41-.66.8-.88 1.35-.16.41-.35 1.03-.4 2.18-.06 1.24-.07 1.61-.07 4.75s.01 3.51.07 4.75c.05 1.15.24 1.77.4 2.18.22.55.47.94.88 1.35.41.41.8.66 1.35.88.41.16 1.03.35 2.18.4 1.24.06 1.61.07 4.75.07s3.51-.01 4.75-.07c1.15-.05 1.77-.24 2.18-.4.55-.22.94-.47 1.35-.88.41-.41.66-.8.88-1.35.16-.41.35-1.03.4-2.18.06-1.24.07-1.61.07-4.75s-.01-3.51-.07-4.75c-.05-1.15-.24-1.77-.4-2.18-.22-.55-.47-.94-.88-1.35-.41-.41-.8-.66-1.35-.88-.41-.16-1.03-.35-2.18-.4-1.24-.06-1.61-.07-4.75-.07zm0 3.37a5.45 5.45 0 1 1 0 10.9 5.45 5.45 0 0 1 0-10.9zm0 8.99a3.54 3.54 0 1 0 0-7.08 3.54 3.54 0 0 0 0 7.08zm6.94-9.21a1.27 1.27 0 1 1-2.55 0 1.27 1.27 0 0 1 2.55 0z"/>',
+      link: '<path d="M3.9 12a5 5 0 0 1 5-5h3v1.9h-3a3.1 3.1 0 0 0 0 6.2h3V17h-3a5 5 0 0 1-5-5zm6.1-1h4v2h-4zm5-4h3a5 5 0 0 1 0 10h-3v-1.9h3a3.1 3.1 0 0 0 0-6.2h-3z"/>'
+    };
+
+    var ui = document.getElementById('vault-ui');
+    var toggle = document.getElementById('unlock-toggle');
+    var form = document.getElementById('unlock-form');
+    var input = document.getElementById('pass');
+    var submit = document.getElementById('unlock-btn');
+    var err = document.getElementById('err');
+    var list = document.getElementById('private-links');
+    var KEY = 'eb-unlocked';
+
+    function bytes(b64) {
+      var bin = atob(b64), out = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+      return out;
+    }
+
+    function decrypt(pass) {
+      var enc = new TextEncoder();
+      return crypto.subtle
+        .importKey('raw', enc.encode(pass), 'PBKDF2', false, ['deriveKey'])
+        .then(function (base) {
+          return crypto.subtle.deriveKey(
+            { name: 'PBKDF2', salt: bytes(vault.salt), iterations: vault.iterations, hash: 'SHA-256' },
+            base, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+        })
+        .then(function (key) {
+          return crypto.subtle.decrypt({ name: 'AES-GCM', iv: bytes(vault.iv) }, key, bytes(vault.ct));
+        })
+        .then(function (buf) {
+          return JSON.parse(new TextDecoder().decode(buf));
+        });
+    }
+
+    function render(data) {
+      (data.items || []).forEach(function (item) {
+        var a = document.createElement('a');
+        a.className = 'link';
+        a.href = item.href;
+        if (/^https?:/i.test(item.href)) { a.target = '_blank'; a.rel = 'noopener'; }
+
+        var ico = document.createElement('span');
+        ico.className = 'ico';
+        ico.setAttribute('aria-hidden', 'true');
+        ico.innerHTML = '<svg viewBox="0 0 24 24">' + (ICONS[item.icon] || ICONS.link) + '</svg>';
+
+        var txt = document.createElement('span');
+        txt.className = 'txt';
+        var label = document.createElement('span');
+        label.className = 'label';
+        label.textContent = item.label;
+        var sub = document.createElement('span');
+        sub.className = 'sub';
+        sub.textContent = item.sub;
+        txt.appendChild(label);
+        txt.appendChild(sub);
+
+        var chev = document.createElement('span');
+        chev.className = 'chev';
+        chev.setAttribute('aria-hidden', 'true');
+        chev.textContent = '→';
+
+        a.appendChild(ico);
+        a.appendChild(txt);
+        a.appendChild(chev);
+        list.appendChild(a);
+      });
+
+      toggle.hidden = true;
+      form.hidden = true;
+      err.hidden = true;
+      list.hidden = false;
+    }
+
+    function attempt(pass, remember) {
+      submit.disabled = true;
+      submit.textContent = 'Unlocking…';
+      err.hidden = true;
+      return decrypt(pass).then(function (data) {
+        render(data);
+        if (remember) { try { sessionStorage.setItem(KEY, pass); } catch (e) {} }
+      }).catch(function () {
+        try { sessionStorage.removeItem(KEY); } catch (e) {}
+        err.textContent = "That passphrase doesn't match.";
+        err.hidden = false;
+        form.hidden = false;
+        ui.dataset.open = 'true';
+        toggle.setAttribute('aria-expanded', 'true');
+        input.value = '';
+        input.focus();
+      }).then(function () {
+        submit.disabled = false;
+        submit.textContent = 'Unlock';
+      });
+    }
+
+    toggle.addEventListener('click', function () {
+      var open = ui.dataset.open !== 'true';
+      ui.dataset.open = open ? 'true' : 'false';
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      form.hidden = !open;
+      if (open) input.focus();
+    });
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (input.value) attempt(input.value, true);
+    });
+
+    // A QR code points at /#k=<passphrase>. The fragment never leaves the
+    // browser, and it is stripped from the address bar once it has been used.
+    var fromHash = /^#k=(.+)$/.exec(location.hash);
+    var saved = null;
+    try { saved = sessionStorage.getItem(KEY); } catch (e) {}
+
+    if (fromHash) {
+      var pass = decodeURIComponent(fromHash[1]);
+      history.replaceState(null, '', location.pathname + location.search);
+      attempt(pass, true);
+    } else if (saved) {
+      attempt(saved, false);
+    }
+  })();
+
   (function () {
     var btn = document.getElementById('copy');
     var txt = document.getElementById('copy-text');
